@@ -3,6 +3,12 @@ Codoner = Codon + Encoder = Codon + Protector
 
 システム上で使用する暗号化システムに、mRNAコドンの仕組みを応用する研究です
 
+## Webサイト
+webサイト適当に作りました！
+
+[codoner -home- ](https://citrus-mizuha.github.io/codoner.github.io/)
+
+
 ## 前提知識 (高校生物基礎の内容)
 ### セントラルドグマ
 
