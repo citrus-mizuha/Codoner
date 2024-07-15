@@ -1,31 +1,44 @@
 import random
 
 
-def generate_quaternary():
-    return f"{random.randint(0, 3):01d}{random.randint(0, 3):01d}{random.randint(0, 3):01d}"
+def generate_unique_quaternaries():
+    all_quaternaries = []
+    for _ in range(64):
+        while True:
+            quaternary = f"{random.randint(0, 3):01d}{random.randint(0, 3):01d}{random.randint(0, 3):01d}"
+            if quaternary not in all_quaternaries:
+                all_quaternaries.append(quaternary)
+                break
+    return all_quaternaries
 
 
-codon_table = {
-    0: [generate_quaternary() for _ in range(4)],
-    1: [generate_quaternary() for _ in range(4)],
-    2: [generate_quaternary() for _ in range(4)],
-    3: [generate_quaternary() for _ in range(4)],
-    4: [generate_quaternary() for _ in range(4)],
-    5: [generate_quaternary() for _ in range(4)],
-    6: [generate_quaternary() for _ in range(4)],
-    7: [generate_quaternary() for _ in range(4)],
-    8: [generate_quaternary() for _ in range(4)],
-    9: [generate_quaternary() for _ in range(4)],
-    10: [generate_quaternary() for _ in range(4)],
-    11: [generate_quaternary() for _ in range(3)],
-    12: [generate_quaternary() for _ in range(3)],
-    13: [generate_quaternary() for _ in range(3)],
-    14: [generate_quaternary() for _ in range(3)],
-    15: [generate_quaternary() for _ in range(3)],
-    "S": [generate_quaternary()],
-    "F": [generate_quaternary() for _ in range(4)]
-}
+def create_random_trimap(unique_quaternaries):
+    numbers = list(range(16))
+    random.shuffle(numbers)
+    four_count = set(numbers[:11])
 
+    trimap = {}
+    quaternary_index = 0
+
+    for num in range(16):
+        if num in four_count:
+            trimap[num] = unique_quaternaries[quaternary_index:quaternary_index + 4]
+            quaternary_index += 4
+        else:
+            trimap[num] = unique_quaternaries[quaternary_index:quaternary_index + 3]
+            quaternary_index += 3
+
+    trimap["S"] = [unique_quaternaries[quaternary_index]]
+    quaternary_index += 1
+    trimap["F"] = unique_quaternaries[quaternary_index:quaternary_index + 4]
+
+    return trimap
+
+
+unique_quaternaries = generate_unique_quaternaries()
+trimap = create_random_trimap(unique_quaternaries)
+
+# 以下、元のコードと同じ
 input_string = input("文字列 : ")
 
 
@@ -41,18 +54,18 @@ def split_into_chunks(binary_string):
 
 
 def encrypt_data(chunks):
-    encrypted_data = []
+    encoded_data = []
     for chunk in chunks:
         value = int(chunk, 2)
-        if value in codon_table:
-            codon_choices = codon_table[value]
+        if value in trimap:
+            codon_choices = trimap[value]
             chosen_codon = random.choice(codon_choices)
-            encrypted_data.append(chosen_codon)
+            encoded_data.append(chosen_codon)
         else:
-            encrypted_data.append("Invalid")
-    encrypted_data.insert(0, "323")
-    encrypted_data.append(random.choice(["330", "331", "332", "333"]))
-    return encrypted_data
+            encoded_data.append("Invalid")
+    encoded_data.insert(0, "323")
+    encoded_data.append(random.choice(["330", "331", "332", "333"]))
+    return encoded_data
 
 
 def convert_to_binary(encrypted_data):
@@ -62,7 +75,7 @@ def convert_to_binary(encrypted_data):
 
 utf8_binary = string_to_binary(input_string)
 
-for key, value in codon_table.items():
+for key, value in trimap.items():
     print(f"{key}: {value}")
 
 print("UTF-8 Binary:", utf8_binary)
@@ -72,4 +85,3 @@ encrypted_data = encrypt_data(binary_chunks)
 print("Pseudo-Quaternary:", encrypted_data)
 converted_binary = convert_to_binary(encrypted_data)
 print("Converted Binary:", converted_binary)
-
